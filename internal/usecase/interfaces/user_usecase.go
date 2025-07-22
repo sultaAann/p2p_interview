@@ -1,7 +1,7 @@
-package repository
+package interfaces
 
 import "p2p_interview/internal/domain/models"
 
-type UserRepository interface {
+type UserUseCase interface {
 	GetAllUsers() ([]models.User, error)
 }
