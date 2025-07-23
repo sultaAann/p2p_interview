@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -23,20 +24,16 @@ func NewConfig(logger *zap.Logger) *Config {
 	return &Config{logger: logger}
 }
 
-func (c *Config) LoadDatabaseCredentials() *ConnectionDB {
+func (c *Config) LoadDatabaseCredentials() (*ConnectionDB, error) {
 	c.logger.Info("Loading Database Credentials")
 
 	var CDB ConnectionDB
-
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("Can not load env fil")
-	// }
 
 	CDB.Host = os.Getenv("DB_HOST")
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	if err != nil {
 		c.logger.Error("Can not load enviroment variable", zap.Error(err))
+		return nil, fmt.Errorf("Error getting Enviroment variables: %w", err)
 	}
 	CDB.Port = port
 	CDB.User = os.Getenv("DB_USER")
@@ -45,5 +42,5 @@ func (c *Config) LoadDatabaseCredentials() *ConnectionDB {
 
 	c.logger.Info("Database Credentials loaded succesfully")
 
-	return &CDB
+	return &CDB, nil
 }

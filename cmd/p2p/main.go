@@ -1,21 +1,59 @@
 package main
 
 import (
+	"context"
+	"log"
 	"os"
+	"os/signal"
+	"p2p_interview/internal/delivery/http"
+	"p2p_interview/internal/delivery/http/handlers"
 	"p2p_interview/internal/infrastructure/config"
 	"p2p_interview/internal/infrastructure/database"
 	"p2p_interview/internal/infrastructure/logging"
 	"p2p_interview/internal/infrastructure/repository"
+	"p2p_interview/internal/usecase"
+	"syscall"
+
+	"go.uber.org/zap"
 )
 
 func main() {
 	logger := logging.NewLogger(os.Getenv("LOG_TYPE"))
+	if logger == nil {
+		log.Fatal("Failed to initialize logger")
+
+	}
 
 	config := config.NewConfig(logger)
 
-	DBCredentials := config.LoadDatabaseCredentials()
+	DBCredentials, err := config.LoadDatabaseCredentials()
+	if err != nil {
+		logger.Fatal("Failed to load database credentials", zap.Error(err))
+		return
+	}
 
-	DB := database.NewConnection(logger).ConnectDB(*DBCredentials)
-
+	DB, err := database.NewConnection(logger).ConnectDB(*DBCredentials)
+	if err != nil {
+		logger.Fatal("Error Creating Connection To Database")
+		return
+	}
 	repository := repository.NewUserRepository(DB, logger)
+
+	usecase := usecase.NewUserCase(repository, logger)
+
+	handlers := handlers.NewUserHandler(usecase, logger)
+
+	router := http.SetupRouter(handlers, logger)
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	serverAddr := ":8080"
+	logger.Info("Starting server", zap.String("address", serverAddr))
+	if err := router.Run(serverAddr); err != nil {
+		logger.Fatal("Server failed", zap.Error(err))
+	}
+
+	<-ctx.Done()
+	logger.Info("Shutting down server")
 }

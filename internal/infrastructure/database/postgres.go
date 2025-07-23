@@ -20,7 +20,7 @@ func NewConnection(logger *zap.Logger) *Connection {
 	return &Connection{logger: logger}
 }
 
-func (c *Connection) ConnectDB(info config.ConnectionDB) *sql.DB {
+func (c *Connection) ConnectDB(info config.ConnectionDB) (*sql.DB, error) {
 	c.logger.Info("Try to connect to DB")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
@@ -29,14 +29,16 @@ func (c *Connection) ConnectDB(info config.ConnectionDB) *sql.DB {
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		c.logger.Fatal("Can not open connection to database", zap.Error(err))
+		return nil, fmt.Errorf("Error opening connection to database: %w", err)
 	}
 
 	err = db.Ping()
 	if err != nil {
 		c.logger.Fatal("Can not to ping database", zap.Error(err))
+		return nil, fmt.Errorf("Error pinging connection to database: %w", err)
 	}
 
 	c.logger.Info("Connected to DB")
 
-	return db
+	return db, nil
 }
