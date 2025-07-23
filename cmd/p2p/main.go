@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -14,10 +15,17 @@ import (
 	"p2p_interview/internal/usecase"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
 func main() {
+	err := godotenv.Load("../../config/.env")
+	if err != nil {
+		fmt.Println(err)
+		log.Fatal("Failed load .env file")
+	}
+
 	logger := logging.NewLogger(os.Getenv("LOG_TYPE"))
 	if logger == nil {
 		log.Fatal("Failed to initialize logger")
