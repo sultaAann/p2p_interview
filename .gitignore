@@ -32,4 +32,4 @@ go.work.sum
 # .vscode/
 
 # Diagrams
-.puml
+diagram.puml
