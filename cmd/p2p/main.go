@@ -12,6 +12,7 @@ import (
 	"p2p_interview/internal/infrastructure/database"
 	"p2p_interview/internal/infrastructure/logging"
 	"p2p_interview/internal/infrastructure/repository"
+	ce "p2p_interview/internal/repository/errors"
 	"p2p_interview/internal/usecase"
 	"syscall"
 
@@ -45,13 +46,17 @@ func main() {
 		logger.Fatal("Error Creating Connection To Database")
 		return
 	}
-	repository := repository.NewUserRepository(DB, logger)
 
-	usecase := usecase.NewUserCase(repository, logger)
+	psqlErrorParser := ce.NewErrorParser(logger)
 
-	handlers := handlers.NewUserHandler(usecase, logger)
+	repository := repository.NewUserRepository(DB, logger, psqlErrorParser)
 
-	router := http.SetupRouter(handlers, logger)
+	userUseCase := usecase.NewUserCase(repository, logger)
+
+	userHadlers := handlers.NewUserHandler(userUseCase, logger)
+	auth := handlers.NewAuth(userUseCase, logger)
+
+	router := http.SetupRouter(auth, userHadlers, logger)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

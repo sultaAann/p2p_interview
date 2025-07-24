@@ -20,7 +20,7 @@ func NewConnection(logger *zap.Logger) *Connection {
 	return &Connection{logger: logger}
 }
 
-func (c *Connection) ConnectDB(info config.ConnectionDB) (*sql.DB, error) {
+func (c *Connection) ConnectDB(info config.DBCreadentials) (*sql.DB, error) {
 	c.logger.Info("Try to connect to DB")
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+

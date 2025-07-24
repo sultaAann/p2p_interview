@@ -3,18 +3,18 @@ package handlers
 import (
 	"net/http"
 	"p2p_interview/internal/domain/models"
-	"p2p_interview/internal/usecase/interfaces"
+	"p2p_interview/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 type UserHandlers struct {
-	usecase interfaces.UserUseCase
+	usecase *usecase.UserUseCase
 	logger  *zap.Logger
 }
 
-func NewUserHandler(usecase interfaces.UserUseCase, logger *zap.Logger) *UserHandlers {
+func NewUserHandler(usecase *usecase.UserUseCase, logger *zap.Logger) *UserHandlers {
 	return &UserHandlers{usecase: usecase, logger: logger}
 }
 

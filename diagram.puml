@@ -1,0 +1,170 @@
+@startuml
+namespace config {
+    class Config << (S,Aquamarine) >> {
+        - logger *zap.Logger
+
+        + LoadDatabaseCredentials() (*DBCreadentials, error)
+
+    }
+    class DBCreadentials << (S,Aquamarine) >> {
+        + Host string
+        + Port int
+        + User string
+        + Password string
+        + Name string
+
+    }
+}
+
+
+
+namespace database {
+    class Connection << (S,Aquamarine) >> {
+        - logger *zap.Logger
+
+        + ConnectDB(info config.DBCreadentials) (*sql.DB, error)
+
+    }
+}
+
+
+
+namespace errors {
+    class ConstraintViolationError << (S,Aquamarine) >> {
+        + Constraint string
+        + Details string
+        + Operation string
+
+        + Error() string
+        + Is(target error) bool
+
+    }
+    class DatabaseError << (S,Aquamarine) >> {
+        + Operation string
+        + Details string
+
+        + Error() string
+        + Is(target error) bool
+
+    }
+    class DuplicateKeyError << (S,Aquamarine) >> {
+        + Field string
+        + Value string
+        + Resource string
+
+        + Error() string
+        + Is(target error) bool
+
+    }
+    class ErrorParser << (S,Aquamarine) >> {
+        - logger *zap.Logger
+
+        - parseUniqueConstraintError(pqErr *pq.Error, operation string) error
+        - parseConstraintName(constraint string) (string, string)
+        - extractValueFromDetail(detail string) string
+        - logError(operation string, err error, errorType string) 
+        - logPostgresError(operation string, pqErr *pq.Error) 
+
+        + ParsePostgresError(err error, operation string) error
+
+    }
+    class NotFoundError << (S,Aquamarine) >> {
+        + Resource string
+        + ID string
+
+        + Error() string
+        + Is(target error) bool
+
+    }
+    class ValidationError << (S,Aquamarine) >> {
+        + Field string
+        + Message string
+
+        + Error() string
+        + Is(target error) bool
+
+    }
+}
+
+
+
+namespace handlers {
+    class Auth << (S,Aquamarine) >> {
+        - user *usecase.UserUseCase
+        - logger *zap.Logger
+
+        + Register(c *gin.Context) 
+
+    }
+    class RegisterUserInput << (S,Aquamarine) >> {
+        + Login string
+        + PasswordHash string
+        + Email string
+        + Name string
+        + Surname string
+
+    }
+    class UserHandlers << (S,Aquamarine) >> {
+        - usecase *usecase.UserUseCase
+        - logger *zap.Logger
+
+        + GetAllUsers(c *gin.Context) 
+
+    }
+}
+
+
+
+namespace models {
+    class User << (S,Aquamarine) >> {
+        + Id string
+        + Login string
+        + PasswordHash string
+        + Email string
+        + Name string
+        + Surname string
+
+        + Validate() error
+
+    }
+}
+
+
+
+namespace repository {
+    interface UserRepository  {
+        + GetAllUsers() ([]models.User, error)
+        + GetUserById(id string) (*models.User, error)
+        + CreateUser(user models.User) (string, error)
+
+    }
+    class userRepository << (S,Aquamarine) >> {
+        - db *sql.DB
+        - logger *zap.Logger
+
+        + GetAllUsers() ([]models.User, error)
+        + GetUserById(id string) (*models.User, error)
+        + CreateUser(user models.User) (string, error)
+
+    }
+}
+
+"repository.UserRepository" <|-- "repository.userRepository"
+
+
+namespace usecase {
+    class UserUseCase << (S,Aquamarine) >> {
+        - repository repository.UserRepository
+        - logger *zap.Logger
+
+        + GetAllUsers() ([]models.User, error)
+        + GetUserById(id string) (*models.User, error)
+        + CreateUser(user models.User) (string, error)
+
+    }
+}
+
+"repository.UserRepository" <|-- "usecase.UserUseCase"
+
+
+@enduml

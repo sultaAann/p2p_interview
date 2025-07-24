@@ -8,12 +8,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func SetupRouter(handlers *handlers.UserHandlers, logger *zap.Logger) *gin.Engine {
+func SetupRouter(auth *handlers.Auth, user *handlers.UserHandlers, logger *zap.Logger) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middleware.ErrorHandler(logger))
 
-	router.GET("/users", handlers.GetAllUsers)
+	router.POST("/register", auth.Register)
+
+	router.GET("/users", user.GetAllUsers)
 
 	return router
 }

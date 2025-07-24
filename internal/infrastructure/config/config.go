@@ -12,7 +12,7 @@ type Config struct {
 	logger *zap.Logger
 }
 
-type ConnectionDB struct {
+type DBCreadentials struct {
 	Host     string
 	Port     int
 	User     string
@@ -24,10 +24,10 @@ func NewConfig(logger *zap.Logger) *Config {
 	return &Config{logger: logger}
 }
 
-func (c *Config) LoadDatabaseCredentials() (*ConnectionDB, error) {
+func (c *Config) LoadDatabaseCredentials() (*DBCreadentials, error) {
 	c.logger.Info("Loading Database Credentials")
 
-	var CDB ConnectionDB
+	var CDB DBCreadentials
 
 	CDB.Host = os.Getenv("DB_HOST")
 	port, err := strconv.Atoi(os.Getenv("DB_PORT"))
