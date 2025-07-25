@@ -26,7 +26,7 @@ type RegisterUserInput struct {
 	PasswordHash string `json:"passwordhash" binding:"required"`
 	Email        string `json:"email" binding:"required"`
 	Name         string `json:"name" binding:"required"`
-	Surname      string `json:"surname" binding:"required"`
+	Surname      string `json:"surname"`
 }
 
 func (a Auth) Register(c *gin.Context) {
