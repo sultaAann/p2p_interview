@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
+
 	"p2p_interview/internal/delivery/http"
 	"p2p_interview/internal/delivery/http/handlers"
 	"p2p_interview/internal/infrastructure/config"
@@ -14,7 +16,6 @@ import (
 	"p2p_interview/internal/infrastructure/repository"
 	ce "p2p_interview/internal/repository/errors"
 	"p2p_interview/internal/usecase"
-	"syscall"
 
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"

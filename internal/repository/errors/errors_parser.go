@@ -35,9 +35,9 @@ func (p *ErrorParser) ParsePostgresError(err error, operation string) error {
 	p.logPostgresError(operation, pqErr)
 
 	switch pqErr.Code {
-	case "23505": 
+	case "23505":
 		return p.parseUniqueConstraintError(pqErr, operation)
-	case "23503": 
+	case "23503":
 		return &ConstraintViolationError{
 			Constraint: pqErr.Constraint,
 			Details:    pqErr.Detail,
@@ -81,11 +81,8 @@ func (p *ErrorParser) parseConstraintName(constraint string) (field, resource st
 		field    string
 		resource string
 	}{
-		"users_email_key":   {"email", "user"},
-		"users_login_key":   {"login", "user"},
-		"users_phone_key":   {"phone", "user"},
-		"products_name_key": {"name", "product"},
-		"orders_number_key": {"number", "order"},
+		"users_email_key": {"email", "user"},
+		"users_login_key": {"login", "user"},
 	}
 
 	if info, exists := constraintMap[constraint]; exists {

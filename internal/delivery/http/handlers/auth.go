@@ -29,6 +29,7 @@ type RegisterUserInput struct {
 	Surname      string `json:"surname"`
 }
 
+// TODO: add error handling and returning right error message
 func (a Auth) Register(c *gin.Context) {
 	var r RegisterUserInput
 

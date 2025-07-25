@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"fmt"
 
 	ce "p2p_interview/internal/domain/errors"
@@ -9,12 +10,10 @@ import (
 	"p2p_interview/internal/repository"
 	pserr "p2p_interview/internal/repository/errors"
 
-	"errors"
-
 	"go.uber.org/zap"
 )
 
-// TODO: handle custom errors
+// TODO: handle custom errors | done
 type UserUseCase struct {
 	repository repository.UserRepository
 	logger     *zap.Logger
@@ -103,6 +102,8 @@ func (u *UserUseCase) CreateUser(user models.User) (string, error) {
 	id, err := u.repository.CreateUser(user)
 	if err != nil {
 		var dbErr *pserr.DatabaseError
+		var dplcErr *pserr.DuplicateKeyError
+		var cnstErr *pserr.ConstraintViolationError
 		if errors.As(err, &dbErr) {
 			u.logger.Error("Failed to create user due to database error",
 				zap.Error(err),
@@ -110,10 +111,22 @@ func (u *UserUseCase) CreateUser(user models.User) (string, error) {
 				zap.String("details", dbErr.Details),
 			)
 			return "", fmt.Errorf("usecase failed to create user due to database issue: %w", err)
-		}
-		if errors.Is(err, fmt.Errorf("user with login %s already exists", user.Login)) {
-			u.logger.Warn("User creation failed: login already exists", zap.String("login", user.Login))
-			return "", fmt.Errorf("user with login %s already exists: %w", user.Login, err)
+		} else if errors.As(err, &dplcErr) {
+			u.logger.Error("Failed to create user due to duplicate error",
+				zap.Error(err),
+				zap.String("resource", dplcErr.Resource),
+				zap.String("filed", dplcErr.Field),
+				zap.String("value", dplcErr.Value),
+			)
+			return "", err
+		} else if errors.As(err, &cnstErr) {
+			u.logger.Error("Failed to create user due to a row violation error",
+				zap.Error(err),
+				zap.String("constraint", cnstErr.Constraint),
+				zap.String("details", cnstErr.Details),
+				zap.String("operation", cnstErr.Operation),
+			)
+			return "", err
 		}
 		u.logger.Error("Unexpected error in usecase", zap.Error(err))
 		return "", fmt.Errorf("unexpected error in usecase: %w", err)
