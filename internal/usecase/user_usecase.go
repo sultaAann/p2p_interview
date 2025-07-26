@@ -11,6 +11,7 @@ import (
 	pserr "p2p_interview/internal/repository/errors"
 
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // TODO: handle custom errors | done
@@ -134,4 +135,35 @@ func (u *UserUseCase) CreateUser(user models.User) (string, error) {
 
 	u.logger.Info("Successfully created user", zap.String("id", id), zap.String("login", user.Login))
 	return id, nil
+}
+
+func (u *UserUseCase) LoginCheck(login, password string) (string, error) {
+	u.logger.Info("Login checking user", zap.String("login", login))
+
+	user, err := u.repository.GetUserByLogin(login)
+	if err != nil {
+		var nfErr *pserr.NotFoundError
+		var dbErr *pserr.DatabaseError
+		if errors.As(err, &nfErr) {
+			u.logger.Info("User not found", zap.String("resource", nfErr.Resource), zap.String("login", login))
+			return "", err
+		} else if errors.As(err, &dbErr) {
+			u.logger.Error("Failed to retrieve user due to database error",
+				zap.Error(err),
+				zap.String("operation", dbErr.Operation),
+				zap.String("details", dbErr.Details),
+			)
+			return "", fmt.Errorf("usecase failed to retrieve user due to database issue: %w", err)
+		}
+		u.logger.Error("Unexpected error in usecase", zap.Error(err))
+		return "", fmt.Errorf("unexpected error in usecase: %w", err)
+	}
+
+	err = security.ComparePassword(password, user.PasswordHash)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		u.logger.Error("Failed to compare password", zap.Error(err))
+		return "", fmt.Errorf("failed to compare password: %w", err)
+	}
+	
+	u.logger.Info("Successfully checked user", zap.String("login", login))
 }

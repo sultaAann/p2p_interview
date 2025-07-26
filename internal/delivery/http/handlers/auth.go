@@ -96,3 +96,21 @@ func (a Auth) Register(c *gin.Context) {
 	a.logger.Info("User created successfully", zap.String("id", id))
 	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
+
+type LoginInput struct {
+	Login    string `json:"login" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// TODO: do login jwt token
+func (a Auth) Login(c *gin.Context) {
+	var login LoginInput
+
+	if err := c.ShouldBindJSON(&login); err != nil {
+		a.logger.Error("Failed to bind JSON", zap.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := a.user.LoginCheck(login.Login, login.Password)
+}

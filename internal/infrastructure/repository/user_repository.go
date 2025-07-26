@@ -89,3 +89,25 @@ func (r *userRepository) CreateUser(user models.User) (string, error) {
 	r.logger.Info("Successfully created user", zap.String("id", id), zap.String("login", user.Login))
 	return id, nil
 }
+
+func (r *userRepository) GetUserByLogin(login string) (*models.User, error) {
+	r.logger.Info("Fetching user by login", zap.String("login", login))
+
+	var user models.User
+
+	err := r.db.QueryRow(
+		"SELECT id, login, password, email, name, surname FROM users WHERE login = $1", login,
+	).Scan(&user.Login, &user.PasswordHash, &user.Email, &user.Name, &user.Surname)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			r.logger.Info("User not found", zap.String("login", login))
+			return nil, &ce.NotFoundError{Resource: "User", ID: user.Id}
+		}
+		r.logger.Error("Database error while fetching user", zap.Error(err))
+		return nil, r.errorParser.ParsePostgresError(err, "get_user_by_login")
+	}
+
+	r.logger.Info("Successfully fetched user", zap.String("login", login))
+	return &user, nil
+}
