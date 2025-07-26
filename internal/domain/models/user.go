@@ -8,8 +8,7 @@ type User struct {
 	PasswordHash string `json:"passwordhash,omitempty"`
 	Email        string `json:"email"`
 	Name         string `json:"name"`
-	Surname      string `json:"surname,omitempty
-	"`
+	Surname      string `json:"surname,omitempty"`
 }
 
 func (user *User) Validate() error {

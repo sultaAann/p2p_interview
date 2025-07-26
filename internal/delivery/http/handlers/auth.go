@@ -6,6 +6,7 @@ import (
 
 	ce "p2p_interview/internal/domain/errors"
 	"p2p_interview/internal/domain/models"
+	pserr "p2p_interview/internal/repository/errors"
 	"p2p_interview/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -29,7 +30,7 @@ type RegisterUserInput struct {
 	Surname      string `json:"surname"`
 }
 
-// TODO: add error handling and returning right error message
+// TODO: add error handling and returning right error message : DONE
 func (a Auth) Register(c *gin.Context) {
 	var r RegisterUserInput
 
@@ -49,12 +50,42 @@ func (a Auth) Register(c *gin.Context) {
 	id, err := a.user.CreateUser(user)
 	if err != nil {
 		var valErr *ce.ValidationError
+		var dbErr *pserr.DatabaseError
+		var dplcErr *pserr.DuplicateKeyError
+		var cnstErr *pserr.ConstraintViolationError
+
 		if errors.As(err, &valErr) {
 			a.logger.Warn("Validation error in user creation",
 				zap.String("field", valErr.Field),
 				zap.String("message", valErr.Message),
 			)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		} else if errors.As(err, &dbErr) {
+			a.logger.Error("Failed to create user due to database error",
+				zap.Error(err),
+				zap.String("operation", dbErr.Operation),
+				zap.String("details", dbErr.Details),
+			)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else if errors.As(err, &dplcErr) {
+			a.logger.Error("Failed to create user due to duplicate error",
+				zap.Error(err),
+				zap.String("resource", dplcErr.Resource),
+				zap.String("filed", dplcErr.Field),
+				zap.String("value", dplcErr.Value),
+			)
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		} else if errors.As(err, &cnstErr) {
+			a.logger.Error("Failed to create user due to a row violation error",
+				zap.Error(err),
+				zap.String("constraint", cnstErr.Constraint),
+				zap.String("details", cnstErr.Details),
+				zap.String("operation", cnstErr.Operation),
+			)
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
 		a.logger.Error("Error creating user", zap.Error(err))
