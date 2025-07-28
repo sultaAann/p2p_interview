@@ -1,0 +1,59 @@
+basePath: /api
+definitions:
+  models.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      passwordhash:
+        type: string
+      surname:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST API for managing P2P interview system
+  title: P2P Interview Management API
+  version: "1.0"
+paths:
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "404":
+          description: No users found
+          schema:
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - users
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

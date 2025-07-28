@@ -164,6 +164,13 @@ func (u *UserUseCase) LoginCheck(login, password string) (string, error) {
 		u.logger.Error("Failed to compare password", zap.Error(err))
 		return "", fmt.Errorf("failed to compare password: %w", err)
 	}
-	
+
+	token, err := security.GenerateToken(user.Id)
+	if err != nil {
+		u.logger.Error("Failed to create token", zap.String("user_id", user.Id), zap.String("login", user.Login))
+		return "", err
+	}
+
 	u.logger.Info("Successfully checked user", zap.String("login", login))
+	return token, nil
 }

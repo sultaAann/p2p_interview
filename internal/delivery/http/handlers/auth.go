@@ -23,14 +23,13 @@ func NewAuth(user *usecase.UserUseCase, logger *zap.Logger) *Auth {
 }
 
 type RegisterUserInput struct {
-	Login        string `json:"login" binding:"required"`
-	PasswordHash string `json:"passwordhash" binding:"required"`
-	Email        string `json:"email" binding:"required"`
-	Name         string `json:"name" binding:"required"`
-	Surname      string `json:"surname"`
+	Login    string `json:"login" binding:"required" example:"user1"`
+	Password string `json:"password" binding:"required" example:"hashedpassword"`
+	Email    string `json:"email" binding:"required" example:"user@example.com"`
+	Name     string `json:"name" binding:"required" example:"John"`
+	Surname  string `json:"surname" example:"Doe"`
 }
 
-// TODO: add error handling and returning right error message : DONE
 func (a Auth) Register(c *gin.Context) {
 	var r RegisterUserInput
 
@@ -42,7 +41,7 @@ func (a Auth) Register(c *gin.Context) {
 	user := models.User{}
 
 	user.Login = r.Login
-	user.PasswordHash = r.PasswordHash
+	user.PasswordHash = r.Password
 	user.Email = r.Email
 	user.Name = r.Name
 	user.Surname = r.Surname
@@ -98,11 +97,10 @@ func (a Auth) Register(c *gin.Context) {
 }
 
 type LoginInput struct {
-	Login    string `json:"login" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Login    string `json:"login" binding:"required" example:"user1"`
+	Password string `json:"password" binding:"required" example:"hashedpassword"`
 }
 
-// TODO: do login jwt token
 func (a Auth) Login(c *gin.Context) {
 	var login LoginInput
 
@@ -113,4 +111,11 @@ func (a Auth) Login(c *gin.Context) {
 	}
 
 	token, err := a.user.LoginCheck(login.Login, login.Password)
+	if err != nil {
+		a.logger.Info("username or password is incorrect", zap.String("login", login.Login))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
+		return
+	}
+	a.logger.Info("Successfully login user", zap.String("login", login.Login))
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }

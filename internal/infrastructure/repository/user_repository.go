@@ -96,8 +96,8 @@ func (r *userRepository) GetUserByLogin(login string) (*models.User, error) {
 	var user models.User
 
 	err := r.db.QueryRow(
-		"SELECT id, login, password, email, name, surname FROM users WHERE login = $1", login,
-	).Scan(&user.Login, &user.PasswordHash, &user.Email, &user.Name, &user.Surname)
+		"SELECT id, login, passwordhash, email, name, surname FROM users WHERE login = $1", login,
+	).Scan(&user.Id, &user.Login, &user.PasswordHash, &user.Email, &user.Name, &user.Surname)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

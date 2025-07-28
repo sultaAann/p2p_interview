@@ -5,7 +5,7 @@ import "p2p_interview/internal/domain/errors"
 type User struct {
 	Id           string `json:"id"`
 	Login        string `json:"login"`
-	PasswordHash string `json:"passwordhash,omitempty"`
+	PasswordHash string `json:"password,omitempty"`
 	Email        string `json:"email"`
 	Name         string `json:"name"`
 	Surname      string `json:"surname,omitempty"`
@@ -16,7 +16,7 @@ func (user *User) Validate() error {
 		return &errors.ValidationError{Field: "login", Message: "cannot be empty"}
 	}
 	if user.PasswordHash == "" {
-		return &errors.ValidationError{Field: "passwordHash", Message: "cannot be empty"}
+		return &errors.ValidationError{Field: "password", Message: "cannot be empty"}
 	}
 	if user.Email == "" {
 		return &errors.ValidationError{Field: "email", Message: "cannot be empty"}
