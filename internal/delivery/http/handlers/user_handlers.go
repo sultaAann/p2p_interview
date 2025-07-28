@@ -5,7 +5,6 @@ import (
 	"net/http"
 	response "p2p_interview/internal/delivery/http/models"
 
-	// models "p2p_interview/internal/domain/models"
 	"p2p_interview/internal/usecase"
 
 	"github.com/gin-gonic/gin"

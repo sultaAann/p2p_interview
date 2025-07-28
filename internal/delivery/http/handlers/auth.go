@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	response "p2p_interview/internal/delivery/http/models"
 	ce "p2p_interview/internal/domain/errors"
 	"p2p_interview/internal/domain/models"
 	pserr "p2p_interview/internal/repository/errors"
@@ -24,21 +25,13 @@ func NewAuth(user *usecase.UserUseCase, logger *zap.Logger) *Auth {
 	return &Auth{user: user, logger: logger}
 }
 
-type RegisterUserInput struct {
-	Login    string `json:"login" binding:"required" example:"user1"`
-	Password string `json:"password" binding:"required" example:"hashedpassword"`
-	Email    string `json:"email" binding:"required" example:"user@example.com"`
-	Name     string `json:"name" binding:"required" example:"John"`
-	Surname  string `json:"surname" example:"Doe"`
-}
-
 // @ID register-user
 // @Summary User registration
 // @Description Creates a new user with the provided data.
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param user body RegisterUserInput true "User registration data"
+// @Param user body response.RegisterUserInput true "User registration data"
 // @Success 201 {object} object{id=string} "Created user ID"
 // @Failure 400 {object} object{error=string} "Validation error"
 // @Failure 409 {object} object{error=string} "User already exists or constraint violation"
@@ -46,7 +39,7 @@ type RegisterUserInput struct {
 // @Security BearerAuth
 // @Router /register [post]
 func (a Auth) Register(c *gin.Context) {
-	var r RegisterUserInput
+	var r response.RegisterUserInput
 
 	if err := c.ShouldBindJSON(&r); err != nil {
 		a.logger.Error("Failed to bind JSON", zap.Error(err))
@@ -84,24 +77,19 @@ func (a Auth) Register(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"id": id})
 }
 
-type LoginInput struct {
-	Login    string `json:"login" binding:"required" example:"user1"`
-	Password string `json:"password" binding:"required" example:"hashedpassword"`
-}
-
 // @ID login-user
 // @Summary User login
 // @Description Authenticates user credentials and returns a JWT token.
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param credentials body LoginInput true "User login credentials"
+// @Param credentials body response.LoginInput true "User login credentials"
 // @Success 200 {object} object{token=string} "JWT access token"
 // @Failure 400 {object} object{error=string} "Invalid input or credentials"
 // @Failure 500 {object} object{error=string} "Internal server error"
 // @Router /login [post]
 func (a Auth) Login(c *gin.Context) {
-	var login LoginInput
+	var login response.LoginInput
 
 	if err := c.ShouldBindJSON(&login); err != nil {
 		a.logger.Error("Failed to bind JSON", zap.Error(err))

@@ -95,7 +95,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginInput"
+                            "$ref": "#/definitions/models.LoginInput"
                         }
                     }
                 ],
@@ -162,7 +162,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.RegisterUserInput"
+                            "$ref": "#/definitions/models.RegisterUserInput"
                         }
                     }
                 ],
@@ -216,7 +216,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.LoginInput": {
+        "models.LoginInput": {
             "type": "object",
             "required": [
                 "login",
@@ -233,7 +233,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.RegisterUserInput": {
+        "models.RegisterUserInput": {
             "type": "object",
             "required": [
                 "email",

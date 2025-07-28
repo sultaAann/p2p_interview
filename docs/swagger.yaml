@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  handlers.LoginInput:
+  models.LoginInput:
     properties:
       login:
         example: user1
@@ -12,7 +12,7 @@ definitions:
     - login
     - password
     type: object
-  handlers.RegisterUserInput:
+  models.RegisterUserInput:
     properties:
       email:
         example: user@example.com
@@ -104,7 +104,7 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/handlers.LoginInput'
+          $ref: '#/definitions/models.LoginInput'
       produces:
       - application/json
       responses:
@@ -144,7 +144,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/handlers.RegisterUserInput'
+          $ref: '#/definitions/models.RegisterUserInput'
       produces:
       - application/json
       responses:

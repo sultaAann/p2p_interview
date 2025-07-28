@@ -92,7 +92,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginInput"
+                            "$ref": "#/definitions/models.LoginInput"
                         }
                     }
                 ],
@@ -159,7 +159,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.RegisterUserInput"
+                            "$ref": "#/definitions/models.RegisterUserInput"
                         }
                     }
                 ],
@@ -213,7 +213,7 @@
         }
     },
     "definitions": {
-        "handlers.LoginInput": {
+        "models.LoginInput": {
             "type": "object",
             "required": [
                 "login",
@@ -230,7 +230,7 @@
                 }
             }
         },
-        "handlers.RegisterUserInput": {
+        "models.RegisterUserInput": {
             "type": "object",
             "required": [
                 "email",
