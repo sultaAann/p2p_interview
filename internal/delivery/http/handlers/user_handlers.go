@@ -3,6 +3,9 @@ package handlers
 
 import (
 	"net/http"
+	response "p2p_interview/internal/delivery/http/models"
+
+	// models "p2p_interview/internal/domain/models"
 	"p2p_interview/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -11,12 +14,6 @@ import (
 	_ "p2p_interview/docs"
 )
 
-// @title P2P Interview Management API
-// @version 1.0
-// @description REST API for managing P2P interview system
-// @host localhost:8080
-// @BasePath /api
-// @schemes http
 type UserHandlers struct {
 	usecase *usecase.UserUseCase
 	logger  *zap.Logger
@@ -26,16 +23,17 @@ func NewUserHandler(usecase *usecase.UserUseCase, logger *zap.Logger) *UserHandl
 	return &UserHandlers{usecase: usecase, logger: logger}
 }
 
+// @ID get-all-users
 // @Summary Get all users
-// @Description Retrieve a list of all users
+// @Description Returns a list of all users in the system.
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {array} models.User
-// @Failure 404 {object} object "No users found"
-// @Failure 500 {object} object "Internal server error"
+// @Success 200 {object} object{data=[]models.UserResponse} "Successful response with user list"
+// @Failure 404 {object} object{error=string} "No users found"
+// @Failure 500 {object} object{error=string} "Internal server error"
 // @Security BearerAuth
-// @Router /users [get]
+// @Router /api/users [get]
 func (h *UserHandlers) GetAllUsers(c *gin.Context) {
 	h.logger.Info("Handling request to get all users")
 
@@ -53,5 +51,9 @@ func (h *UserHandlers) GetAllUsers(c *gin.Context) {
 	}
 
 	h.logger.Info("Successfully retrieved users", zap.Int("count", len(users)))
-	c.JSON(http.StatusOK, gin.H{"data": users})
+	result := []response.UserResponse{}
+	for _, user := range users {
+		result = append(result, response.UserToUserResponse(user))
+	}
+	c.JSON(http.StatusOK, gin.H{"data": result})
 }

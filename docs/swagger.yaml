@@ -1,6 +1,41 @@
-basePath: /api
+basePath: /
 definitions:
-  models.User:
+  handlers.LoginInput:
+    properties:
+      login:
+        example: user1
+        type: string
+      password:
+        example: hashedpassword
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  handlers.RegisterUserInput:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      login:
+        example: user1
+        type: string
+      name:
+        example: John
+        type: string
+      password:
+        example: hashedpassword
+        type: string
+      surname:
+        example: Doe
+        type: string
+    required:
+    - email
+    - login
+    - name
+    - password
+    type: object
+  models.UserResponse:
     properties:
       email:
         type: string
@@ -9,8 +44,6 @@ definitions:
       login:
         type: string
       name:
-        type: string
-      passwordhash:
         type: string
       surname:
         type: string
@@ -22,31 +55,130 @@ info:
   title: P2P Interview Management API
   version: "1.0"
 paths:
-  /users:
+  /api/users:
     get:
       consumes:
       - application/json
-      description: Retrieve a list of all users
+      description: Returns a list of all users in the system.
+      operationId: get-all-users
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Successful response with user list
           schema:
-            items:
-              $ref: '#/definitions/models.User'
-            type: array
+            properties:
+              data:
+                items:
+                  $ref: '#/definitions/models.UserResponse'
+                type: array
+            type: object
         "404":
           description: No users found
           schema:
+            properties:
+              error:
+                type: string
             type: object
         "500":
           description: Internal server error
           schema:
+            properties:
+              error:
+                type: string
             type: object
       security:
       - BearerAuth: []
       summary: Get all users
+      tags:
+      - users
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates user credentials and returns a JWT token.
+      operationId: login-user
+      parameters:
+      - description: User login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT access token
+          schema:
+            properties:
+              token:
+                type: string
+            type: object
+        "400":
+          description: Invalid input or credentials
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: User login
+      tags:
+      - users
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user with the provided data.
+      operationId: register-user
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterUserInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created user ID
+          schema:
+            properties:
+              id:
+                type: string
+            type: object
+        "400":
+          description: Validation error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "409":
+          description: User already exists or constraint violation
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: User registration
       tags:
       - users
 schemes:

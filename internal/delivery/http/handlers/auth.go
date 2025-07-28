@@ -11,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+
+	_ "p2p_interview/docs"
 )
 
 type Auth struct {
@@ -30,6 +32,19 @@ type RegisterUserInput struct {
 	Surname  string `json:"surname" example:"Doe"`
 }
 
+// @ID register-user
+// @Summary User registration
+// @Description Creates a new user with the provided data.
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body RegisterUserInput true "User registration data"
+// @Success 201 {object} object{id=string} "Created user ID"
+// @Failure 400 {object} object{error=string} "Validation error"
+// @Failure 409 {object} object{error=string} "User already exists or constraint violation"
+// @Failure 500 {object} object{error=string} "Internal server error"
+// @Security BearerAuth
+// @Router /register [post]
 func (a Auth) Register(c *gin.Context) {
 	var r RegisterUserInput
 
@@ -38,57 +53,30 @@ func (a Auth) Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user := models.User{}
 
-	user.Login = r.Login
-	user.PasswordHash = r.Password
-	user.Email = r.Email
-	user.Name = r.Name
-	user.Surname = r.Surname
+	user := models.User{
+		Login:        r.Login,
+		PasswordHash: r.Password,
+		Email:        r.Email,
+		Name:         r.Name,
+		Surname:      r.Surname,
+	}
 
 	id, err := a.user.CreateUser(user)
 	if err != nil {
-		var valErr *ce.ValidationError
-		var dbErr *pserr.DatabaseError
-		var dplcErr *pserr.DuplicateKeyError
-		var cnstErr *pserr.ConstraintViolationError
-
-		if errors.As(err, &valErr) {
-			a.logger.Warn("Validation error in user creation",
-				zap.String("field", valErr.Field),
-				zap.String("message", valErr.Message),
-			)
+		switch {
+		case errors.As(err, new(*ce.ValidationError)):
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		} else if errors.As(err, &dbErr) {
-			a.logger.Error("Failed to create user due to database error",
-				zap.Error(err),
-				zap.String("operation", dbErr.Operation),
-				zap.String("details", dbErr.Details),
-			)
+		case errors.As(err, new(*pserr.DuplicateKeyError)):
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		case errors.As(err, new(*pserr.ConstraintViolationError)):
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		case errors.As(err, new(*pserr.DatabaseError)):
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		} else if errors.As(err, &dplcErr) {
-			a.logger.Error("Failed to create user due to duplicate error",
-				zap.Error(err),
-				zap.String("resource", dplcErr.Resource),
-				zap.String("filed", dplcErr.Field),
-				zap.String("value", dplcErr.Value),
-			)
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-			return
-		} else if errors.As(err, &cnstErr) {
-			a.logger.Error("Failed to create user due to a row violation error",
-				zap.Error(err),
-				zap.String("constraint", cnstErr.Constraint),
-				zap.String("details", cnstErr.Details),
-				zap.String("operation", cnstErr.Operation),
-			)
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-			return
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		}
 		a.logger.Error("Error creating user", zap.Error(err))
-		c.Error(err)
 		return
 	}
 
@@ -101,6 +89,17 @@ type LoginInput struct {
 	Password string `json:"password" binding:"required" example:"hashedpassword"`
 }
 
+// @ID login-user
+// @Summary User login
+// @Description Authenticates user credentials and returns a JWT token.
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param credentials body LoginInput true "User login credentials"
+// @Success 200 {object} object{token=string} "JWT access token"
+// @Failure 400 {object} object{error=string} "Invalid input or credentials"
+// @Failure 500 {object} object{error=string} "Internal server error"
+// @Router /login [post]
 func (a Auth) Login(c *gin.Context) {
 	var login LoginInput
 
@@ -112,10 +111,11 @@ func (a Auth) Login(c *gin.Context) {
 
 	token, err := a.user.LoginCheck(login.Login, login.Password)
 	if err != nil {
-		a.logger.Info("username or password is incorrect", zap.String("login", login.Login))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
+		a.logger.Info("Username or password is incorrect", zap.String("login", login.Login))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username or password is incorrect."})
 		return
 	}
-	a.logger.Info("Successfully login user", zap.String("login", login.Login))
+
+	a.logger.Info("Successfully logged in user", zap.String("login", login.Login))
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
