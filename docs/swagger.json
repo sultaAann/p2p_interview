@@ -33,14 +33,14 @@
                 "operationId": "get-all-users",
                 "responses": {
                     "200": {
-                        "description": "Successful response with user list",
+                        "description": "Successful dto with user list",
                         "schema": {
                             "type": "object",
                             "properties": {
                                 "data": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/definitions/models.UserResponse"
+                                        "$ref": "#/definitions/dto.UserResponse"
                                     }
                                 }
                             }
@@ -92,7 +92,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.LoginInput"
+                            "$ref": "#/definitions/dto.LoginInput"
                         }
                     }
                 ],
@@ -159,7 +159,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.RegisterUserInput"
+                            "$ref": "#/definitions/dto.RegisterUserInput"
                         }
                     }
                 ],
@@ -213,7 +213,7 @@
         }
     },
     "definitions": {
-        "models.LoginInput": {
+        "dto.LoginInput": {
             "type": "object",
             "required": [
                 "login",
@@ -230,7 +230,7 @@
                 }
             }
         },
-        "models.RegisterUserInput": {
+        "dto.RegisterUserInput": {
             "type": "object",
             "required": [
                 "email",
@@ -261,7 +261,7 @@
                 }
             }
         },
-        "models.UserResponse": {
+        "dto.UserResponse": {
             "type": "object",
             "properties": {
                 "email": {

@@ -36,14 +36,14 @@ const docTemplate = `{
                 "operationId": "get-all-users",
                 "responses": {
                     "200": {
-                        "description": "Successful response with user list",
+                        "description": "Successful dto with user list",
                         "schema": {
                             "type": "object",
                             "properties": {
                                 "data": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/definitions/models.UserResponse"
+                                        "$ref": "#/definitions/dto.UserResponse"
                                     }
                                 }
                             }
@@ -95,7 +95,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.LoginInput"
+                            "$ref": "#/definitions/dto.LoginInput"
                         }
                     }
                 ],
@@ -162,7 +162,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.RegisterUserInput"
+                            "$ref": "#/definitions/dto.RegisterUserInput"
                         }
                     }
                 ],
@@ -216,7 +216,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.LoginInput": {
+        "dto.LoginInput": {
             "type": "object",
             "required": [
                 "login",
@@ -233,7 +233,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.RegisterUserInput": {
+        "dto.RegisterUserInput": {
             "type": "object",
             "required": [
                 "email",
@@ -264,7 +264,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserResponse": {
+        "dto.UserResponse": {
             "type": "object",
             "properties": {
                 "email": {

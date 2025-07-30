@@ -31,7 +31,6 @@ func main() {
 	logger := logging.NewLogger(os.Getenv("LOG_TYPE"))
 	if logger == nil {
 		log.Fatal("Failed to initialize logger")
-
 	}
 
 	config := config.NewConfig(logger)

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	response "p2p_interview/internal/delivery/http/models"
+	"p2p_interview/internal/delivery/http/dto"
 	ce "p2p_interview/internal/domain/errors"
 	"p2p_interview/internal/domain/models"
 	pserr "p2p_interview/internal/repository/errors"
@@ -31,7 +31,7 @@ func NewAuth(user *usecase.UserUseCase, logger *zap.Logger) *Auth {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param user body response.RegisterUserInput true "User registration data"
+// @Param user body dto.RegisterUserInput true "User registration data"
 // @Success 201 {object} object{id=string} "Created user ID"
 // @Failure 400 {object} object{error=string} "Validation error"
 // @Failure 409 {object} object{error=string} "User already exists or constraint violation"
@@ -39,7 +39,7 @@ func NewAuth(user *usecase.UserUseCase, logger *zap.Logger) *Auth {
 // @Security BearerAuth
 // @Router /register [post]
 func (a Auth) Register(c *gin.Context) {
-	var r response.RegisterUserInput
+	var r dto.RegisterUserInput
 
 	if err := c.ShouldBindJSON(&r); err != nil {
 		a.logger.Error("Failed to bind JSON", zap.Error(err))
@@ -83,13 +83,13 @@ func (a Auth) Register(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param credentials body response.LoginInput true "User login credentials"
+// @Param credentials body dto.LoginInput true "User login credentials"
 // @Success 200 {object} object{token=string} "JWT access token"
 // @Failure 400 {object} object{error=string} "Invalid input or credentials"
 // @Failure 500 {object} object{error=string} "Internal server error"
 // @Router /login [post]
 func (a Auth) Login(c *gin.Context) {
-	var login response.LoginInput
+	var login dto.LoginInput
 
 	if err := c.ShouldBindJSON(&login); err != nil {
 		a.logger.Error("Failed to bind JSON", zap.Error(err))

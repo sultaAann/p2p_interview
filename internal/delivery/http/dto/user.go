@@ -1,4 +1,4 @@
-package models
+package dto
 
 import "p2p_interview/internal/domain/models"
 

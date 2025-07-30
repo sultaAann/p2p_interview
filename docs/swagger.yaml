@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  models.LoginInput:
+  dto.LoginInput:
     properties:
       login:
         example: user1
@@ -12,7 +12,7 @@ definitions:
     - login
     - password
     type: object
-  models.RegisterUserInput:
+  dto.RegisterUserInput:
     properties:
       email:
         example: user@example.com
@@ -35,7 +35,7 @@ definitions:
     - name
     - password
     type: object
-  models.UserResponse:
+  dto.UserResponse:
     properties:
       email:
         type: string
@@ -65,12 +65,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: Successful response with user list
+          description: Successful dto with user list
           schema:
             properties:
               data:
                 items:
-                  $ref: '#/definitions/models.UserResponse'
+                  $ref: '#/definitions/dto.UserResponse'
                 type: array
             type: object
         "404":
@@ -104,7 +104,7 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/models.LoginInput'
+          $ref: '#/definitions/dto.LoginInput'
       produces:
       - application/json
       responses:
@@ -144,7 +144,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.RegisterUserInput'
+          $ref: '#/definitions/dto.RegisterUserInput'
       produces:
       - application/json
       responses:

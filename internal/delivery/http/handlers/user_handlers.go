@@ -3,7 +3,7 @@ package handlers
 
 import (
 	"net/http"
-	response "p2p_interview/internal/delivery/http/models"
+	"p2p_interview/internal/delivery/http/dto"
 
 	"p2p_interview/internal/usecase"
 
@@ -28,7 +28,7 @@ func NewUserHandler(usecase *usecase.UserUseCase, logger *zap.Logger) *UserHandl
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {object} object{data=[]models.UserResponse} "Successful response with user list"
+// @Success 200 {object} object{data=[]dto.UserResponse} "Successful dto with user list"
 // @Failure 404 {object} object{error=string} "No users found"
 // @Failure 500 {object} object{error=string} "Internal server error"
 // @Security BearerAuth
@@ -50,9 +50,9 @@ func (h *UserHandlers) GetAllUsers(c *gin.Context) {
 	}
 
 	h.logger.Info("Successfully retrieved users", zap.Int("count", len(users)))
-	result := []response.UserResponse{}
+	result := []dto.UserResponse{}
 	for _, user := range users {
-		result = append(result, response.UserToUserResponse(user))
+		result = append(result, dto.UserToUserResponse(user))
 	}
 	c.JSON(http.StatusOK, gin.H{"data": result})
 }
